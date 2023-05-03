@@ -21,7 +21,7 @@ DATASETS={
             } 
 }
 
-def get_dataset(dataset_name='lenna_jpg', target_folder='./datasets/', datasets=DATASETS):
+def get_dataset(dataset_name='lenna_jpg', target_folder='../datasets/', datasets=DATASETS):
 
     # judge dataset exit or not
     if dataset_name not in datasets.keys():
