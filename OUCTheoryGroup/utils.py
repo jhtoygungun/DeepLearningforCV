@@ -1,6 +1,6 @@
 import wget
 import os
-import cv2
+import skimage.io as io
 
 # dict
 DATASETS={
@@ -38,5 +38,5 @@ def get_dataset(dataset_name='lenna_jpg', target_folder='../datasets/', datasets
     else:
         print("Warninig: {} is not downloadable!".format(dataset_name))
 
-    img = cv2.imread(folder + filename)
+    img = io.imread(folder + filename)
     return img
