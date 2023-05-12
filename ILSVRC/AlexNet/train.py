@@ -46,19 +46,46 @@ def get_data():
     return train_dataloader, valid_dataloader
 
 def get_model(device, num_classes):
-    model = AlexNet().to(device)
+    model = AlexNet(num_classes).to(device)
     return model
 
-def train(device, num_epochs, lr, wd):
-    num_classes = 10 # CIFAR-10
+def train(device, num_epochs, num_classes, lr, wd):
+    num_classes = num_classes # CIFAR-10
     net = get_model(device, num_classes)
-    loss = nn.CrossEntropyLoss(reduction="none")
-    optimizer = optim.Adam(net.parameters(), lr=lr)
+    train_iter, valid_iter = get_data()
+
+    loss_fun = nn.CrossEntropyLoss(reduction="none")
+    optimizer = optim.Adam(net.parameters(), lr=lr,weight_decay=wd)
 
     save_path = './model/'
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
-    
+
+    temp_correct, temp_loss = 0, 0
+    for epoch in range(num_epochs):
+        net.train()
+        for batch_idx, (x, y) in enumerate(train_iter):
+            optimizer.zero_grad()
+
+            x, y = x.to(device), y.to(device)
+
+            y_hat = net(x)
+            loss = loss_fun(y_hat, y)
+            loss.backward()
+            optimizer.step()
+
+        label_hat = torch.argmax(y_hat, dim=1)
+        temp_correct += (label_hat == y).max()
+        temp_loss += loss
+
+        print(f'epoch:{epoch + 1}, batch:{batch_idx}, loss')
+
+    valid(net, valid_iter, device)
+
+def valid(net, valid_iter, device):
+    net.eval()
+
+
 
 if __name__ == '__main__':
     # device
@@ -66,4 +93,6 @@ if __name__ == '__main__':
     print("device:{}".format(device))
 
     num_epochs, lr, wd = 20, 2e-4, 5e-4
-    train(device, num_epochs, lr, wd)
+    num_classes = 10
+
+    train(device, num_epochs, num_classes, lr, wd)
