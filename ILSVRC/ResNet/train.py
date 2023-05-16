@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 
-from model import AlexNet
+from model import ResNet18
 
 
 def get_data():
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     dataloaders = get_data()
 
     # model
-    alexnet_module = AlexNet(num_classes)
+    alexnet_module = ResNet18(num_classes)
     alexnet_module = alexnet_module.to(device)
 
     # Declare Optimizer and Loss function
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     # count parameters
     print(f'{alexnet_module} has {count_parameters(alexnet_module):,} trainable parameters')
     print()
-    model_param_name = 'alex_module_lr_0.001'
+    model_param_name = 'resnet_module_lr_0.001'
     # train and validate
     best_model, val_acc_history, loss_acc_history = train_model(alexnet_module, device, dataloaders, criterion, optimizer, num_epochs, model_param_name)
 

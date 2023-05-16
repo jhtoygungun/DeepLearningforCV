@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 
-from model import AlexNet
+from model import VGG
 
 
 def get_data():
@@ -197,21 +197,22 @@ if __name__ == '__main__':
     dataloaders = get_data()
 
     # model
-    alexnet_module = AlexNet(num_classes)
-    alexnet_module = alexnet_module.to(device)
+    vgg = [96, 96, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    net_module = VGG(num_classes, vgg)
+    net_module = net_module.to(device)
 
     # Declare Optimizer and Loss function
     num_epochs, lr, wd = 5, 1e-3, 1e-4
     criterion = nn.CrossEntropyLoss()
-    params_to_update = alexnet_module.parameters()
+    params_to_update = net_module.parameters()
     optimizer = optim.Adam(params_to_update, lr=lr, weight_decay=wd)
 
     # count parameters
-    print(f'{alexnet_module} has {count_parameters(alexnet_module):,} trainable parameters')
+    print(f'{net_module} has {count_parameters(net_module):,} trainable parameters')
     print()
     model_param_name = 'alex_module_lr_0.001'
     # train and validate
-    best_model, val_acc_history, loss_acc_history = train_model(alexnet_module, device, dataloaders, criterion, optimizer, num_epochs, model_param_name)
+    best_model, val_acc_history, loss_acc_history = train_model(net_module, device, dataloaders, criterion, optimizer, num_epochs, model_param_name)
 
     # plot
     plot_data(val_acc_history, loss_acc_history)
