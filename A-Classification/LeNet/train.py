@@ -5,7 +5,6 @@ from model import LeNet
 import torch.optim as optim
 import torchvision.transforms as transforms
 
-
 def main():
     transform = transforms.Compose(
         [transforms.ToTensor(),
@@ -16,14 +15,14 @@ def main():
     # 50000张训练图片
     # 第一次使用时要将download设置为True才会自动去下载数据集
     train_set = torchvision.datasets.CIFAR10(root=date_root, train=True,
-                                             download=True, transform=transform)
+                                             download=False, transform=transform)
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=36,
                                                shuffle=True, num_workers=0)
 
     # 10000张验证图片
     # 第一次使用时要将download设置为True才会自动去下载数据集
     val_set = torchvision.datasets.CIFAR10(root=date_root, train=False,
-                                           download=True, transform=transform)
+                                           download=False, transform=transform)
     val_loader = torch.utils.data.DataLoader(val_set, batch_size=5000,
                                              shuffle=False, num_workers=0)
     val_data_iter = iter(val_loader)
