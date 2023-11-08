@@ -6,7 +6,7 @@ from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
 
-from model import GoogLeNet
+from model import vgg
 
 
 def main():
@@ -33,15 +33,13 @@ def main():
 
     with open(json_path, "r") as f:
         class_indict = json.load(f)
-
+    
     # create model
-    model = GoogLeNet(num_classes=5, aux_logits=False).to(device)
-
+    model = vgg(model_name="vgg16", num_classes=5).to(device)
     # load model weights
-    weights_path = "./googleNet.pth"
+    weights_path = "./vgg16Net.pth"
     assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
-    missing_keys, unexpected_keys = model.load_state_dict(torch.load(weights_path, map_location=device),
-                                                          strict=False)
+    model.load_state_dict(torch.load(weights_path, map_location=device))
 
     model.eval()
     with torch.no_grad():

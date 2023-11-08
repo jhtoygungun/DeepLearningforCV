@@ -6,7 +6,7 @@ from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
 
-from model import GoogLeNet
+from model import AlexNet
 
 
 def main():
@@ -21,6 +21,7 @@ def main():
     img_path = "./tulip.jpg"
     assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
     img = Image.open(img_path)
+
     plt.imshow(img)
     # [N, C, H, W]
     img = data_transform(img)
@@ -35,13 +36,12 @@ def main():
         class_indict = json.load(f)
 
     # create model
-    model = GoogLeNet(num_classes=5, aux_logits=False).to(device)
+    model = AlexNet(num_classes=5).to(device)
 
     # load model weights
-    weights_path = "./googleNet.pth"
+    weights_path = "./AlexNet.pth"
     assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
-    missing_keys, unexpected_keys = model.load_state_dict(torch.load(weights_path, map_location=device),
-                                                          strict=False)
+    model.load_state_dict(torch.load(weights_path))
 
     model.eval()
     with torch.no_grad():
