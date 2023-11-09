@@ -6,11 +6,11 @@ from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
 
-from model import resnet34
+from model_v2 import MobileNetV2
 
 
 def main():
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     data_transform = transforms.Compose(
         [transforms.Resize(256),
@@ -19,7 +19,7 @@ def main():
          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
     # load image
-    img_path = "./tulip.jpg"
+    img_path = "../tulip.jpg"
     assert os.path.exists(img_path), "file: '{}' dose not exist.".format(img_path)
     img = Image.open(img_path)
     plt.imshow(img)
@@ -36,14 +36,10 @@ def main():
         class_indict = json.load(f)
 
     # create model
-    model = resnet34(num_classes=5).to(device)
-
+    model = MobileNetV2(num_classes=5).to(device)
     # load model weights
-    weights_path = "./resNet34.pth"
-    assert os.path.exists(weights_path), "file: '{}' dose not exist.".format(weights_path)
-    model.load_state_dict(torch.load(weights_path, map_location=device))
-
-    # prediction
+    model_weight_path = "./MobileNetV2.pth"
+    model.load_state_dict(torch.load(model_weight_path, map_location=device))
     model.eval()
     with torch.no_grad():
         # predict class

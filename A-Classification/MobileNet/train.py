@@ -8,12 +8,15 @@ import torch.optim as optim
 from torchvision import transforms, datasets
 from tqdm import tqdm
 
-from model import resnet34
+from model_v2 import MobileNetV2
 
 
 def main():
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("using {} device.".format(device))
+
+    batch_size = 16
+    epochs = 5
 
     data_transform = {
         "train": transforms.Compose([transforms.RandomResizedCrop(224),
@@ -25,11 +28,8 @@ def main():
                                    transforms.ToTensor(),
                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])}
 
-    data_root = os.path.abspath(os.path.join(os.getcwd(), "../../datasets"))  # get data root path
-    image_path = os.path.join(data_root, "flower", "flower_data")  # flower data set path
-    
-    # print(image_path)
-    
+    data_root = os.path.abspath(os.path.join(os.getcwd(), "../.."))  # get data root path
+    image_path = os.path.join(data_root, "data_set", "flower_data")  # flower data set path
     assert os.path.exists(image_path), "{} path does not exist.".format(image_path)
     train_dataset = datasets.ImageFolder(root=os.path.join(image_path, "train"),
                                          transform=data_transform["train"])
@@ -43,7 +43,6 @@ def main():
     with open('class_indices.json', 'w') as json_file:
         json_file.write(json_str)
 
-    batch_size = 16
     nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])  # number of workers
     print('Using {} dataloader workers every process'.format(nw))
 
@@ -60,19 +59,24 @@ def main():
 
     print("using {} images for training, {} images for validation.".format(train_num,
                                                                            val_num))
-    
-    net = resnet34()
-    # load pretrain weights
-    # download url: https://download.pytorch.org/models/resnet34-333f7ec4.pth
-    model_weight_path = "./pretrain_weights/resnet34-pre.pth"
-    assert os.path.exists(model_weight_path), "file {} does not exist.".format(model_weight_path)
-    net.load_state_dict(torch.load(model_weight_path, map_location='cpu'))
-    # for param in net.parameters():
-    #     param.requires_grad = False
 
-    # change fc layer structure
-    in_channel = net.fc.in_features
-    net.fc = nn.Linear(in_channel, 5)
+    # create model
+    net = MobileNetV2(num_classes=5)
+
+    # load pretrain weights
+    # download url: https://download.pytorch.org/models/mobilenet_v2-b0353104.pth
+    model_weight_path = "./mobilenet_v2.pth"
+    assert os.path.exists(model_weight_path), "file {} dose not exist.".format(model_weight_path)
+    pre_weights = torch.load(model_weight_path, map_location='cpu')
+
+    # delete classifier weights
+    pre_dict = {k: v for k, v in pre_weights.items() if net.state_dict()[k].numel() == v.numel()}
+    missing_keys, unexpected_keys = net.load_state_dict(pre_dict, strict=False)
+
+    # freeze features weights
+    for param in net.features.parameters():
+        param.requires_grad = False
+
     net.to(device)
 
     # define loss function
@@ -82,9 +86,8 @@ def main():
     params = [p for p in net.parameters() if p.requires_grad]
     optimizer = optim.Adam(params, lr=0.0001)
 
-    epochs = 3
     best_acc = 0.0
-    save_path = './resNet34.pth'
+    save_path = './MobileNetV2.pth'
     train_steps = len(train_loader)
     for epoch in range(epochs):
         # train
@@ -120,7 +123,6 @@ def main():
 
                 val_bar.desc = "valid epoch[{}/{}]".format(epoch + 1,
                                                            epochs)
-
         val_accurate = acc / val_num
         print('[epoch %d] train_loss: %.3f  val_accuracy: %.3f' %
               (epoch + 1, running_loss / train_steps, val_accurate))
