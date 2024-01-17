@@ -1,5 +1,5 @@
 
-<h1 align="center">DeepLearningforCV</h1>
+<h1 align="center">Deep Learning for Computer Vision</h1>
 
 # A-Classification
 - LeNet
