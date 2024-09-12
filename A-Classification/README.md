@@ -1,0 +1,14 @@
+# A-Classification
+- LeNet
+- AlexNet
+- VGG
+- GoogLeNet
+- ResNet 
+- ResNeXt  
+- DenseNet
+- MobileNet
+- ShuffleNet  
+- EfficientNet
+- EfficientNetV2
+- RegNet
+- ConvNeXt
